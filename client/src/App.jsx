@@ -1,16 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import TaskManager from './Taskmanager/TaskManager'
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './LoginAndRegistration/Login';
+import TaskManager from './Taskmanager/TaskManager';
+import Register from './LoginAndRegistration/Register'; // Optional: Add a register component
 
-export default function App() {
- 
+const App = () => {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/tasks" element={<TaskManager />} />
+            </Routes>
+        </Router>
+    );
+};
 
-  return (
-    <div className="App">
-    <TaskManager />
-  </div>
-  )
-}
-
+export default App;

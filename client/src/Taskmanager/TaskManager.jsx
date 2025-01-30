@@ -13,21 +13,16 @@ function TaskManager() {
 
     const handleTask = () => {
         if (updateTask && input) {
-            // Update API call
-            console.log('update api call');
             const obj = {
                 taskName: input,
                 isDone: updateTask.isDone,
                 _id: updateTask._id
             };
-            handleUpdateItem(obj);
+            handleUpdateTask(obj);
         } else if (updateTask === null && input) {
-            console.log('create api call');
-            // Create API call
             handleAddTask();
         }
         setInput('');
-        fetchAllTasks();
     };
 
     useEffect(() => {
@@ -44,13 +39,11 @@ function TaskManager() {
         try {
             const { success, message } = await CreateTask(obj);
             if (success) {
-                // Show success toast
                 notify(message, 'success');
+                fetchAllTasks();
             } else {
-                // Show error toast
                 notify(message, 'error');
             }
-            fetchAllTasks();
         } catch (err) {
             console.error(err);
             notify('Failed to create task', 'error');
@@ -76,44 +69,19 @@ function TaskManager() {
         try {
             const { success, message } = await DeleteTaskById(id);
             if (success) {
-                // Show success toast
                 notify(message, 'success');
+                fetchAllTasks();
             } else {
-                // Show error toast
                 notify(message, 'error');
             }
-            fetchAllTasks();
         } catch (err) {
             console.error(err);
             notify('Failed to delete task', 'error');
         }
-        
     };
 
-    const handleCheckAndUncheck = async (item) => {
-        const { _id, isDone, taskName } = item;
-        const obj = {
-            taskName,
-            isDone: !isDone
-        };
-        try {
-            const { success, message } = await UpdateTaskById(_id, obj);
-            if (success) {
-                // Show success toast
-                notify(message, 'success');
-            } else {
-                // Show error toast
-                notify(message, 'error');
-            }
-            fetchAllTasks();
-        } catch (err) {
-            console.error(err);
-            notify('Failed to update task', 'error');
-        }
-    };
-
-    const handleUpdateItem = async (item) => {
-        const { _id, isDone, taskName } = item;
+    const handleUpdateTask = async (item, isDone = item.isDone) => {
+        const { _id, taskName } = item;
         const obj = {
             taskName,
             isDone: isDone
@@ -121,10 +89,9 @@ function TaskManager() {
         try {
             const { success, message } = await UpdateTaskById(_id, obj);
             if (success) {
-                // Show success toast
                 notify(message, 'success');
+                setUpdateTask(null); // Reset updateTask state
             } else {
-                // Show error toast
                 notify(message, 'error');
             }
             fetchAllTasks();
@@ -136,15 +103,17 @@ function TaskManager() {
 
     const handleSearch = (e) => {
         const term = e.target.value.toLowerCase();
-        const oldTasks = [...copyTasks];
-        const results = oldTasks.filter((item) => item.taskName.toLowerCase().includes(term));
-        setTasks(results);
+        if (term === '') {
+            setTasks(copyTasks);
+        } else {
+            const results = copyTasks.filter((item) => item.taskName.toLowerCase().includes(term));
+            setTasks(results);
+        }
     };
 
     return (
         <div className={styles.taskManager}>
             <h1 className={styles.heading}>Task Manager App</h1>
-            {/* Input and Search box */}
             <div className={styles.inputContainer}>
                 <div className={styles.inputGroup}>
                     <input
@@ -154,10 +123,7 @@ function TaskManager() {
                         className={styles.input}
                         placeholder='Add a new Task'
                     />
-                    <button
-                        onClick={handleTask}
-                        className={styles.addButton}
-                    >
+                    <button onClick={handleTask} className={styles.addButton}>
                         <FaPlus />
                     </button>
                 </div>
@@ -175,17 +141,13 @@ function TaskManager() {
                 </div>
             </div>
 
-            {/* List of items */}
             <div className={styles.taskList}>
                 {tasks.map((item) => (
                     <div key={item._id} className={`${styles.taskItem} ${item.isDone ? styles.done : ''}`}>
-                        <span className={styles.taskName}>
-                            {item.taskName}
-                        </span>
-
+                        <span className={styles.taskName}>{item.taskName}</span>
                         <div className={styles.buttonGroup}>
                             <button
-                                onClick={() => handleCheckAndUncheck(item)}
+                                onClick={() => handleUpdateTask(item, !item.isDone)}
                                 className={styles.checkButton}
                                 type='button'
                             >
@@ -210,7 +172,6 @@ function TaskManager() {
                 ))}
             </div>
 
-            {/* Toastify */}
             <ToastContainer
                 position='top-right'
                 autoClose={3000}

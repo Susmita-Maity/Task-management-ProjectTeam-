@@ -3,8 +3,12 @@ const TaskModel = require("../Models/TaskModel");
 
 const createTask = async (req, res) => {
     const data = req.body;
+    const obj={
+        ...data,
+        user_id: req.user.id
+    }
     try {
-        const model = new TaskModel(data);
+        const model = new TaskModel(obj);
         await model.save();
         res.status(201)
             .json({ message: 'Task is created', success: true });
@@ -15,7 +19,7 @@ const createTask = async (req, res) => {
 
 const fetchAllTasks = async (req, res) => {
     try {
-        const data = await TaskModel.find({});
+        const data = await TaskModel.find({user_id: req.user.id});
         res.status(200)
             .json({ message: 'All Tasks', success: true, data });
     } catch (err) {
